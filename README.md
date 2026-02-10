@@ -1,4 +1,4 @@
-# 🧹 dev-cleaner
+# 🧹 sweepkit
 
 **A blazing-fast CLI tool to scan and clean unused dev dependencies across all ecosystems.**
 
