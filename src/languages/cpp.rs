@@ -22,7 +22,10 @@ impl LanguageCleaner for CppCleaner {
                 sibling: "Makefile".to_string(),
             },
             DetectionPattern::GlobPattern("cmake-build-*".to_string()),
-            DetectionPattern::DirectoryName("out".to_string()),
+            DetectionPattern::DirectoryWithSibling {
+                dir_name: "out".to_string(),
+                sibling: "CMakeLists.txt".to_string(),
+            },
         ]
     }
 

@@ -18,7 +18,6 @@ impl LanguageCleaner for NodeCleaner {
             DetectionPattern::DirectoryName(".nuxt".to_string()),
             DetectionPattern::DirectoryName(".parcel-cache".to_string()),
             DetectionPattern::DirectoryName("bower_components".to_string()),
-            DetectionPattern::DirectoryName(".cache".to_string()),
             DetectionPattern::DirectoryWithSibling {
                 dir_name: "dist".to_string(),
                 sibling: "package.json".to_string(),

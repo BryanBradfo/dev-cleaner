@@ -135,7 +135,7 @@ pub fn scan_directory_filtered(root: &Path, language: &str) -> Vec<FoundItem> {
         None => {
             let available: Vec<String> = languages::get_all_cleaners()
                 .iter()
-                .map(|c| format!("{} ({})", c.name().to_lowercase().replace(".", ""), c.name()))
+                .map(|c| c.name().to_string())
                 .collect();
             eprintln!(
                 "⚠️  Unknown language '{}'. Available: {}",

@@ -18,6 +18,14 @@ impl LanguageCleaner for JavaCleaner {
                 dir_name: "build".to_string(),
                 sibling: "build.gradle".to_string(),
             },
+            DetectionPattern::DirectoryWithSibling {
+                dir_name: "build".to_string(),
+                sibling: "build.gradle.kts".to_string(),
+            },
+            DetectionPattern::DirectoryWithSibling {
+                dir_name: "build".to_string(),
+                sibling: "pom.xml".to_string(),
+            },
         ]
     }
 
