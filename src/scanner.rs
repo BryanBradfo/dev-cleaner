@@ -21,7 +21,7 @@ fn calculate_dir_size(path: &Path) -> u64 {
         .sum()
 }
 
-/// Check if a file exists in the parent directory
+/// Check if a sibling file exists (in the parent directory)
 fn has_sibling_file(dir: &Path, filename: &str) -> bool {
     if let Some(parent) = dir.parent() {
         parent.join(filename).exists()

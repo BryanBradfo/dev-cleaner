@@ -59,6 +59,15 @@ pub fn get_all_cleaners() -> Vec<Box<dyn LanguageCleaner>> {
     ]
 }
 
+/// Check if a language name matches an alias
+fn is_language_alias(input: &str, cleaner_name: &str) -> bool {
+    // Special case mappings for common aliases
+    match (input, cleaner_name) {
+        ("cpp", "c++") => true,
+        _ => false,
+    }
+}
+
 /// Get a specific language cleaner by name (case-insensitive)
 pub fn get_cleaner_by_name(name: &str) -> Option<Box<dyn LanguageCleaner>> {
     let name_lower = name.to_lowercase();
@@ -70,8 +79,8 @@ pub fn get_cleaner_by_name(name: &str) -> Option<Box<dyn LanguageCleaner>> {
             if cleaner_name_lower == name_lower {
                 return true;
             }
-            // Special case: allow "cpp" to match "c++"
-            if name_lower == "cpp" && cleaner_name_lower == "c++" {
+            // Check for special aliases
+            if is_language_alias(&name_lower, &cleaner_name_lower) {
                 return true;
             }
             // Normalized match (remove dots, hyphens for node.js, etc.)
