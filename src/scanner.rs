@@ -35,7 +35,7 @@ fn check_pattern(
     dir_name: &str,
     full_path: &Path,
     pattern: &DetectionPattern,
-    cleaner: &Box<dyn LanguageCleaner>,
+    cleaner: &dyn LanguageCleaner,
 ) -> Option<(String, String)> {
     match pattern {
         DetectionPattern::DirectoryName(name) => {
@@ -57,13 +57,11 @@ fn check_pattern(
         }
         DetectionPattern::GlobPattern(glob_pattern) => {
             // Simple glob matching for patterns like "*.egg-info" or "cmake-build-*"
-            if glob_pattern.starts_with('*') {
-                let suffix = &glob_pattern[1..];
+            if let Some(suffix) = glob_pattern.strip_prefix('*') {
                 if dir_name.ends_with(suffix) {
                     return Some((cleaner.name().to_string(), cleaner.icon().to_string()));
                 }
-            } else if glob_pattern.ends_with('*') {
-                let prefix = &glob_pattern[..glob_pattern.len() - 1];
+            } else if let Some(prefix) = glob_pattern.strip_suffix('*') {
                 if dir_name.starts_with(prefix) {
                     return Some((cleaner.name().to_string(), cleaner.icon().to_string()));
                 }
@@ -90,7 +88,7 @@ fn scan_with_cleaners(root: &Path, cleaners: &[Box<dyn LanguageCleaner>]) -> Vec
             for cleaner in cleaners {
                 for pattern in cleaner.project_patterns() {
                     if let Some((ecosystem, icon)) =
-                        check_pattern(dir_name, path, &pattern, cleaner)
+                        check_pattern(dir_name, path, &pattern, &**cleaner)
                     {
                         // Check if this path is already inside a found item
                         let is_nested = found_paths

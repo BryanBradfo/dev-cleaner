@@ -16,12 +16,15 @@ pub enum DetectionPattern {
     GlobPattern(String),
 }
 
+// These types are defined for future features (global cache scanning, orphaned package detection)
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct GlobalCachePath {
     pub path: PathBuf,
     pub description: String,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct OrphanedPackage {
     pub name: String,
@@ -40,9 +43,11 @@ pub trait LanguageCleaner: Send + Sync {
     fn project_patterns(&self) -> Vec<DetectionPattern>;
 
     /// Return a list of global cache locations to scan
+    #[allow(dead_code)]
     fn global_cache_paths(&self) -> Vec<GlobalCachePath>;
 
     /// Optional: Detect orphaned global packages
+    #[allow(dead_code)]
     fn detect_orphaned_packages(&self) -> Option<Vec<OrphanedPackage>> {
         None
     }
@@ -62,10 +67,7 @@ pub fn get_all_cleaners() -> Vec<Box<dyn LanguageCleaner>> {
 /// Check if a language name matches an alias
 fn is_language_alias(input: &str, cleaner_name: &str) -> bool {
     // Special case mappings for common aliases
-    match (input, cleaner_name) {
-        ("cpp", "c++") => true,
-        _ => false,
-    }
+    matches!((input, cleaner_name), ("cpp", "c++"))
 }
 
 /// Get a specific language cleaner by name (case-insensitive)
