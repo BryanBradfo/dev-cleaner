@@ -28,8 +28,8 @@ pub fn display_scan_results(items: &[FoundItem]) {
     let mut total_size: u64 = 0;
 
     for (idx, item) in items.iter().enumerate() {
-        let ecosystem = item
-            .ecosystem
+        let ecosystem_display = format!("{} {}", item.icon, item.ecosystem);
+        let ecosystem = ecosystem_display
             .color(get_ecosystem_color(&item.ecosystem))
             .bold();
         let size = format_size(item.size).cyan().bold();
