@@ -1,6 +1,6 @@
+use std::fs;
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
-use std::fs;
 
 #[derive(Debug, Clone)]
 pub struct FoundItem {
@@ -55,7 +55,9 @@ fn should_scan(dir_name: &str, full_path: &Path) -> Option<String> {
         }
         ".gradle" => Some("Gradle".to_string()),
         "build" => {
-            if has_sibling_file(full_path, "build.gradle") || has_sibling_file(full_path, "build.gradle.kts") {
+            if has_sibling_file(full_path, "build.gradle")
+                || has_sibling_file(full_path, "build.gradle.kts")
+            {
                 Some("Gradle".to_string())
             } else if has_sibling_file(full_path, "CMakeLists.txt") {
                 Some("CMake".to_string())
@@ -86,12 +88,9 @@ pub fn scan_directory(root: &Path) -> Vec<FoundItem> {
 
     // We'll use WalkDir's min_depth to control traversal depth
     // and manually skip directories we've already identified as dev dependencies
-    for entry in WalkDir::new(root)
-        .into_iter()
-        .filter_map(|e| e.ok())
-    {
+    for entry in WalkDir::new(root).into_iter().filter_map(|e| e.ok()) {
         let path = entry.path();
-        
+
         if !path.is_dir() {
             continue;
         }
@@ -99,12 +98,14 @@ pub fn scan_directory(root: &Path) -> Vec<FoundItem> {
         if let Some(dir_name) = path.file_name().and_then(|n| n.to_str()) {
             if let Some(ecosystem) = should_scan(dir_name, path) {
                 // Check if this path is already inside a found item
-                let is_nested = found_items.iter().any(|item: &FoundItem| path.starts_with(&item.path));
-                
+                let is_nested = found_items
+                    .iter()
+                    .any(|item: &FoundItem| path.starts_with(&item.path));
+
                 if !is_nested {
                     // Calculate size
                     let size = calculate_dir_size(path);
-                    
+
                     if size > 0 {
                         found_items.push(FoundItem {
                             path: path.to_path_buf(),
@@ -119,6 +120,6 @@ pub fn scan_directory(root: &Path) -> Vec<FoundItem> {
 
     // Sort by size descending
     found_items.sort_by(|a, b| b.size.cmp(&a.size));
-    
+
     found_items
 }

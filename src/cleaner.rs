@@ -1,7 +1,7 @@
 use crate::scanner::FoundItem;
 use crate::utils;
 use colored::Colorize;
-use dialoguer::{theme::ColorfulTheme, MultiSelect, Confirm};
+use dialoguer::{theme::ColorfulTheme, Confirm, MultiSelect};
 use indicatif::{ProgressBar, ProgressStyle};
 use std::fs;
 
@@ -58,7 +58,7 @@ pub fn clean_directories(items: Vec<FoundItem>, all: bool) {
 
     // Calculate total space to reclaim
     let total_size: u64 = selections.iter().map(|&i| items[i].size).sum();
-    
+
     println!(
         "\n💾 Total space to be reclaimed: {}",
         utils::format_size(total_size).bold().green()
@@ -67,12 +67,15 @@ pub fn clean_directories(items: Vec<FoundItem>, all: bool) {
     // Final confirmation
     if !all {
         let confirm = Confirm::with_theme(&ColorfulTheme::default())
-            .with_prompt(format!("Are you sure you want to delete {} directories?", selections.len()))
+            .with_prompt(format!(
+                "Are you sure you want to delete {} directories?",
+                selections.len()
+            ))
             .default(false)
             .interact();
 
         match confirm {
-            Ok(true) => {},
+            Ok(true) => {}
             _ => {
                 println!("❌ Deletion cancelled");
                 return;
@@ -82,7 +85,7 @@ pub fn clean_directories(items: Vec<FoundItem>, all: bool) {
 
     // Delete selected directories
     println!("\n🗑️  Deleting directories...\n");
-    
+
     let pb = ProgressBar::new(selections.len() as u64);
     pb.set_style(
         ProgressStyle::default_bar()
@@ -104,7 +107,11 @@ pub fn clean_directories(items: Vec<FoundItem>, all: bool) {
             }
             Err(e) => {
                 error_count += 1;
-                pb.println(format!("❌ Failed to delete {}: {}", item.path.display(), e));
+                pb.println(format!(
+                    "❌ Failed to delete {}: {}",
+                    item.path.display(),
+                    e
+                ));
             }
         }
 
@@ -117,5 +124,8 @@ pub fn clean_directories(items: Vec<FoundItem>, all: bool) {
     if error_count > 0 {
         println!("⚠️  Failed to delete {} directories", error_count);
     }
-    println!("💾 Reclaimed approximately {}", utils::format_size(total_size).bold().green());
+    println!(
+        "💾 Reclaimed approximately {}",
+        utils::format_size(total_size).bold().green()
+    );
 }

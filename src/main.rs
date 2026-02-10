@@ -1,5 +1,5 @@
-mod scanner;
 mod cleaner;
+mod scanner;
 mod utils;
 
 use clap::{Parser, Subcommand};
@@ -44,9 +44,9 @@ fn main() {
     match cli.command {
         Commands::Scan { path } => {
             println!("🔍 Scanning {} for dev dependencies...\n", path.display());
-            
+
             let items = scanner::scan_directory(&path);
-            
+
             if items.is_empty() {
                 println!("✨ No dev dependency folders found!");
                 return;
@@ -56,9 +56,9 @@ fn main() {
         }
         Commands::Clean { path, all, dry_run } => {
             println!("🔍 Scanning {} for dev dependencies...\n", path.display());
-            
+
             let items = scanner::scan_directory(&path);
-            
+
             if items.is_empty() {
                 println!("✨ No dev dependency folders found!");
                 return;
@@ -68,7 +68,10 @@ fn main() {
                 println!("🔍 DRY RUN - Nothing will be deleted\n");
                 utils::display_scan_results(&items);
                 let total_size: u64 = items.iter().map(|item| item.size).sum();
-                println!("\n💾 Total space that would be reclaimed: {}", utils::format_size(total_size));
+                println!(
+                    "\n💾 Total space that would be reclaimed: {}",
+                    utils::format_size(total_size)
+                );
             } else {
                 cleaner::clean_directories(items, all);
             }
