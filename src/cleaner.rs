@@ -87,12 +87,12 @@ pub fn clean_directories(items: Vec<FoundItem>, all: bool) {
     println!("\n🗑️  Deleting directories...\n");
 
     let pb = ProgressBar::new(selections.len() as u64);
-    pb.set_style(
-        ProgressStyle::default_bar()
-            .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} {msg}")
-            .unwrap()
-            .progress_chars("#>-"),
-    );
+    let style_result = ProgressStyle::default_bar()
+        .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} {msg}");
+    
+    if let Ok(style) = style_result {
+        pb.set_style(style.progress_chars("#>-"));
+    }
 
     let mut success_count = 0;
     let mut error_count = 0;

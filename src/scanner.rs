@@ -1,4 +1,3 @@
-use std::fs;
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
@@ -14,7 +13,7 @@ fn calculate_dir_size(path: &Path) -> u64 {
     WalkDir::new(path)
         .into_iter()
         .filter_map(|entry| entry.ok())
-        .filter_map(|entry| fs::metadata(entry.path()).ok())
+        .filter_map(|entry| entry.metadata().ok())
         .filter(|metadata| metadata.is_file())
         .map(|metadata| metadata.len())
         .sum()
@@ -85,6 +84,7 @@ fn should_scan(dir_name: &str, full_path: &Path) -> Option<String> {
 /// Scan directory recursively for dev dependencies
 pub fn scan_directory(root: &Path) -> Vec<FoundItem> {
     let mut found_items = Vec::new();
+    let mut found_paths = std::collections::HashSet::new();
 
     // We'll use WalkDir's min_depth to control traversal depth
     // and manually skip directories we've already identified as dev dependencies
@@ -97,10 +97,10 @@ pub fn scan_directory(root: &Path) -> Vec<FoundItem> {
 
         if let Some(dir_name) = path.file_name().and_then(|n| n.to_str()) {
             if let Some(ecosystem) = should_scan(dir_name, path) {
-                // Check if this path is already inside a found item
-                let is_nested = found_items
+                // Check if this path is already inside a found item using HashSet
+                let is_nested = found_paths
                     .iter()
-                    .any(|item: &FoundItem| path.starts_with(&item.path));
+                    .any(|found_path: &std::path::PathBuf| path.starts_with(found_path));
 
                 if !is_nested {
                     // Calculate size
@@ -112,6 +112,7 @@ pub fn scan_directory(root: &Path) -> Vec<FoundItem> {
                             ecosystem,
                             size,
                         });
+                        found_paths.insert(path.to_path_buf());
                     }
                 }
             }

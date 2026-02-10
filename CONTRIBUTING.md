@@ -101,9 +101,11 @@ To add support for a new package manager or build system:
 
 Example:
 ```rust
-"maven_target" => {
+"target" => {
     if has_sibling_file(full_path, "pom.xml") {
         Some("Maven".to_string())
+    } else if has_sibling_file(full_path, "Cargo.toml") {
+        Some("Rust".to_string())
     } else {
         None
     }
