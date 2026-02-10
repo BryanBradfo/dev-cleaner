@@ -70,9 +70,8 @@ pub fn get_cleaner_by_name(name: &str) -> Option<Box<dyn LanguageCleaner>> {
             if cleaner_name_lower == name_lower {
                 return true;
             }
-            // Special case for C++/cpp
-            if (name_lower == "cpp" && cleaner_name_lower == "c++") || 
-               (name_lower == "c++" && cleaner_name_lower == "cpp") {
+            // Special case: allow "cpp" to match "c++"
+            if name_lower == "cpp" && cleaner_name_lower == "c++" {
                 return true;
             }
             // Normalized match (remove dots, hyphens for node.js, etc.)

@@ -94,10 +94,10 @@ dev-cleaner uses a modular architecture with dedicated language modules for each
 | Ecosystem | Icon | Directories Detected |
 |-----------|------|---------------------|
 | 🐍 Python | `python` | `__pycache__`, `.venv`, `venv`, `env`, `.tox`, `.pytest_cache`, `.mypy_cache`, `.ruff_cache`, `*.egg-info`, `dist` (with `setup.py`) |
-| 🟢 Node.js | `node` | `node_modules`, `.next`, `.nuxt`, `.parcel-cache`, `dist` (with `package.json`), `bower_components`, `.cache` |
+| 🟢 Node.js | `node` | `node_modules`, `.next`, `.nuxt`, `.parcel-cache`, `dist` (with `package.json`), `bower_components` |
 | 🦀 Rust | `rust` | `target` (with `Cargo.toml`) |
-| ☕ Java | `java` | `.gradle`, `build` (with `build.gradle` or `build.gradle.kts`) |
-| ⚙️ C++ | `cpp` | `build` (with `CMakeLists.txt` or `Makefile`), `cmake-build-*`, `out` |
+| ☕ Java | `java` | `.gradle`, `build` (with `build.gradle`, `build.gradle.kts`, or `pom.xml`) |
+| ⚙️ C++ | `cpp` | `build` (with `CMakeLists.txt` or `Makefile`), `cmake-build-*`, `out` (with `CMakeLists.txt`) |
 
 ### Context-Aware Detection
 
