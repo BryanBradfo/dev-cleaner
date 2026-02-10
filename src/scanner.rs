@@ -133,9 +133,14 @@ pub fn scan_directory_filtered(root: &Path, language: &str) -> Vec<FoundItem> {
             scan_with_cleaners(root, &cleaners)
         }
         None => {
+            let available: Vec<String> = languages::get_all_cleaners()
+                .iter()
+                .map(|c| format!("{} ({})", c.name().to_lowercase().replace(".", ""), c.name()))
+                .collect();
             eprintln!(
-                "⚠️  Unknown language '{}'. Available: python, node, rust, java, cpp",
-                language
+                "⚠️  Unknown language '{}'. Available: {}",
+                language,
+                available.join(", ")
             );
             Vec::new()
         }
