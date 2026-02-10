@@ -61,11 +61,27 @@ pub fn get_all_cleaners() -> Vec<Box<dyn LanguageCleaner>> {
 
 /// Get a specific language cleaner by name (case-insensitive)
 pub fn get_cleaner_by_name(name: &str) -> Option<Box<dyn LanguageCleaner>> {
-    let name_lower = name.to_lowercase().replace(".", "").replace("-", "");
+    let name_lower = name.to_lowercase();
     get_all_cleaners()
         .into_iter()
         .find(|cleaner| {
-            let cleaner_name = cleaner.name().to_lowercase().replace(".", "").replace("-", "");
-            cleaner_name == name_lower || cleaner_name.starts_with(&name_lower)
+            let cleaner_name_lower = cleaner.name().to_lowercase();
+            // Direct match
+            if cleaner_name_lower == name_lower {
+                return true;
+            }
+            // Special case for C++/cpp
+            if (name_lower == "cpp" && cleaner_name_lower == "c++") || 
+               (name_lower == "c++" && cleaner_name_lower == "cpp") {
+                return true;
+            }
+            // Normalized match (remove dots, hyphens for node.js, etc.)
+            let name_normalized = name_lower.replace(".", "").replace("-", "");
+            let cleaner_normalized = cleaner_name_lower.replace(".", "").replace("-", "");
+            if cleaner_normalized == name_normalized {
+                return true;
+            }
+            // Starts with match for normalized version
+            cleaner_normalized.starts_with(&name_normalized)
         })
 }
