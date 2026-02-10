@@ -89,7 +89,7 @@ pub fn clean_directories(items: Vec<FoundItem>, all: bool) {
     let pb = ProgressBar::new(selections.len() as u64);
     let style_result = ProgressStyle::default_bar()
         .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} {msg}");
-    
+
     if let Ok(style) = style_result {
         pb.set_style(style.progress_chars("#>-"));
     }
