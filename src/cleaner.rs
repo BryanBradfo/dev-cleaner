@@ -30,7 +30,8 @@ pub fn clean_directories(items: Vec<FoundItem>, all: bool) {
             .iter()
             .map(|item| {
                 format!(
-                    "{} - {} ({})",
+                    "{} {} - {} ({})",
+                    item.icon,
                     item.path.display(),
                     item.ecosystem,
                     utils::format_size(item.size)

@@ -1,3 +1,4 @@
+use crate::languages::{self, DetectionPattern, LanguageCleaner};
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
@@ -5,6 +6,7 @@ use walkdir::WalkDir;
 pub struct FoundItem {
     pub path: PathBuf,
     pub ecosystem: String,
+    pub icon: String,
     pub size: u64,
 }
 
@@ -19,7 +21,7 @@ fn calculate_dir_size(path: &Path) -> u64 {
         .sum()
 }
 
-/// Check if a file exists in the same directory
+/// Check if a sibling file exists (in the parent directory)
 fn has_sibling_file(dir: &Path, filename: &str) -> bool {
     if let Some(parent) = dir.parent() {
         parent.join(filename).exists()
@@ -28,66 +30,52 @@ fn has_sibling_file(dir: &Path, filename: &str) -> bool {
     }
 }
 
-/// Check if directory is a Python virtual environment
-fn is_python_venv(dir: &Path) -> bool {
-    dir.join("pyvenv.cfg").exists()
-}
-
-/// Check if this directory should be scanned
-fn should_scan(dir_name: &str, full_path: &Path) -> Option<String> {
-    match dir_name {
-        "node_modules" => Some("Node.js".to_string()),
-        "__pycache__" => Some("Python".to_string()),
-        ".venv" | "venv" | "env" | ".env" => {
-            if is_python_venv(full_path) {
-                Some("Python venv".to_string())
+/// Check if directory matches a pattern and return ecosystem info
+fn check_pattern(
+    dir_name: &str,
+    full_path: &Path,
+    pattern: &DetectionPattern,
+    cleaner: &dyn LanguageCleaner,
+) -> Option<(String, String)> {
+    match pattern {
+        DetectionPattern::DirectoryName(name) => {
+            if dir_name == name {
+                Some((cleaner.name().to_string(), cleaner.icon().to_string()))
             } else {
                 None
             }
         }
-        "target" => {
-            if has_sibling_file(full_path, "Cargo.toml") {
-                Some("Rust".to_string())
+        DetectionPattern::DirectoryWithSibling {
+            dir_name: dn,
+            sibling,
+        } => {
+            if dir_name == dn && has_sibling_file(full_path, sibling) {
+                Some((cleaner.name().to_string(), cleaner.icon().to_string()))
             } else {
                 None
             }
         }
-        ".gradle" => Some("Gradle".to_string()),
-        "build" => {
-            if has_sibling_file(full_path, "build.gradle")
-                || has_sibling_file(full_path, "build.gradle.kts")
-            {
-                Some("Gradle".to_string())
-            } else if has_sibling_file(full_path, "CMakeLists.txt") {
-                Some("CMake".to_string())
-            } else {
-                None
+        DetectionPattern::GlobPattern(glob_pattern) => {
+            // Simple glob matching for patterns like "*.egg-info" or "cmake-build-*"
+            if let Some(suffix) = glob_pattern.strip_prefix('*') {
+                if dir_name.ends_with(suffix) {
+                    return Some((cleaner.name().to_string(), cleaner.icon().to_string()));
+                }
+            } else if let Some(prefix) = glob_pattern.strip_suffix('*') {
+                if dir_name.starts_with(prefix) {
+                    return Some((cleaner.name().to_string(), cleaner.icon().to_string()));
+                }
             }
+            None
         }
-        ".tox" => Some("Python tox".to_string()),
-        ".pytest_cache" => Some("Python pytest".to_string()),
-        ".mypy_cache" => Some("Python mypy".to_string()),
-        ".next" => Some("Next.js".to_string()),
-        "dist" => {
-            if has_sibling_file(full_path, "package.json") {
-                Some("JavaScript".to_string())
-            } else {
-                None
-            }
-        }
-        ".parcel-cache" => Some("Parcel".to_string()),
-        "bower_components" => Some("Bower".to_string()),
-        _ => None,
     }
 }
 
-/// Scan directory recursively for dev dependencies
-pub fn scan_directory(root: &Path) -> Vec<FoundItem> {
+/// Scan directory recursively for dev dependencies using language cleaners
+fn scan_with_cleaners(root: &Path, cleaners: &[Box<dyn LanguageCleaner>]) -> Vec<FoundItem> {
     let mut found_items = Vec::new();
     let mut found_paths = std::collections::HashSet::new();
 
-    // We'll use WalkDir's min_depth to control traversal depth
-    // and manually skip directories we've already identified as dev dependencies
     for entry in WalkDir::new(root).into_iter().filter_map(|e| e.ok()) {
         let path = entry.path();
 
@@ -96,23 +84,31 @@ pub fn scan_directory(root: &Path) -> Vec<FoundItem> {
         }
 
         if let Some(dir_name) = path.file_name().and_then(|n| n.to_str()) {
-            if let Some(ecosystem) = should_scan(dir_name, path) {
-                // Check if this path is already inside a found item using HashSet
-                let is_nested = found_paths
-                    .iter()
-                    .any(|found_path: &std::path::PathBuf| path.starts_with(found_path));
+            // Try each cleaner's patterns
+            for cleaner in cleaners {
+                for pattern in cleaner.project_patterns() {
+                    if let Some((ecosystem, icon)) =
+                        check_pattern(dir_name, path, &pattern, &**cleaner)
+                    {
+                        // Check if this path is already inside a found item
+                        let is_nested = found_paths
+                            .iter()
+                            .any(|found_path: &PathBuf| path.starts_with(found_path));
 
-                if !is_nested {
-                    // Calculate size
-                    let size = calculate_dir_size(path);
+                        if !is_nested {
+                            let size = calculate_dir_size(path);
 
-                    if size > 0 {
-                        found_items.push(FoundItem {
-                            path: path.to_path_buf(),
-                            ecosystem,
-                            size,
-                        });
-                        found_paths.insert(path.to_path_buf());
+                            if size > 0 {
+                                found_items.push(FoundItem {
+                                    path: path.to_path_buf(),
+                                    ecosystem,
+                                    icon,
+                                    size,
+                                });
+                                found_paths.insert(path.to_path_buf());
+                            }
+                        }
+                        break; // Found a match, no need to check other patterns
                     }
                 }
             }
@@ -123,4 +119,32 @@ pub fn scan_directory(root: &Path) -> Vec<FoundItem> {
     found_items.sort_by(|a, b| b.size.cmp(&a.size));
 
     found_items
+}
+
+/// Scan directory recursively for all dev dependencies
+pub fn scan_directory(root: &Path) -> Vec<FoundItem> {
+    let cleaners = languages::get_all_cleaners();
+    scan_with_cleaners(root, &cleaners)
+}
+
+/// Scan directory filtered by a specific language
+pub fn scan_directory_filtered(root: &Path, language: &str) -> Vec<FoundItem> {
+    match languages::get_cleaner_by_name(language) {
+        Some(cleaner) => {
+            let cleaners = vec![cleaner];
+            scan_with_cleaners(root, &cleaners)
+        }
+        None => {
+            let available: Vec<String> = languages::get_all_cleaners()
+                .iter()
+                .map(|c| c.name().to_string())
+                .collect();
+            eprintln!(
+                "⚠️  Unknown language '{}'. Available: {}",
+                language,
+                available.join(", ")
+            );
+            Vec::new()
+        }
+    }
 }

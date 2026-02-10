@@ -1,4 +1,5 @@
 mod cleaner;
+mod languages;
 mod scanner;
 mod utils;
 
@@ -21,6 +22,10 @@ enum Commands {
         /// Root directory to scan (default: current directory)
         #[arg(short, long, default_value = ".")]
         path: PathBuf,
+
+        /// Filter by language/ecosystem (e.g., python, node, rust, java, cpp)
+        #[arg(short, long)]
+        language: Option<String>,
     },
     /// Clean dev dependency folders interactively
     Clean {
@@ -35,6 +40,10 @@ enum Commands {
         /// Dry run - show what would be deleted without deleting
         #[arg(short, long, default_value_t = false)]
         dry_run: bool,
+
+        /// Filter by language/ecosystem (e.g., python, node, rust, java, cpp)
+        #[arg(short = 'l', long)]
+        language: Option<String>,
     },
 }
 
@@ -42,10 +51,14 @@ fn main() {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Scan { path } => {
+        Commands::Scan { path, language } => {
             println!("🔍 Scanning {} for dev dependencies...\n", path.display());
 
-            let items = scanner::scan_directory(&path);
+            let items = if let Some(lang) = language {
+                scanner::scan_directory_filtered(&path, &lang)
+            } else {
+                scanner::scan_directory(&path)
+            };
 
             if items.is_empty() {
                 println!("✨ No dev dependency folders found!");
@@ -54,10 +67,19 @@ fn main() {
 
             utils::display_scan_results(&items);
         }
-        Commands::Clean { path, all, dry_run } => {
+        Commands::Clean {
+            path,
+            all,
+            dry_run,
+            language,
+        } => {
             println!("🔍 Scanning {} for dev dependencies...\n", path.display());
 
-            let items = scanner::scan_directory(&path);
+            let items = if let Some(lang) = language {
+                scanner::scan_directory_filtered(&path, &lang)
+            } else {
+                scanner::scan_directory(&path)
+            };
 
             if items.is_empty() {
                 println!("✨ No dev dependency folders found!");
