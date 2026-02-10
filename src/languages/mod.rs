@@ -71,25 +71,23 @@ fn is_language_alias(input: &str, cleaner_name: &str) -> bool {
 /// Get a specific language cleaner by name (case-insensitive)
 pub fn get_cleaner_by_name(name: &str) -> Option<Box<dyn LanguageCleaner>> {
     let name_lower = name.to_lowercase();
-    get_all_cleaners()
-        .into_iter()
-        .find(|cleaner| {
-            let cleaner_name_lower = cleaner.name().to_lowercase();
-            // Direct match
-            if cleaner_name_lower == name_lower {
-                return true;
-            }
-            // Check for special aliases
-            if is_language_alias(&name_lower, &cleaner_name_lower) {
-                return true;
-            }
-            // Normalized match (remove dots, hyphens for node.js, etc.)
-            let name_normalized = name_lower.replace(".", "").replace("-", "");
-            let cleaner_normalized = cleaner_name_lower.replace(".", "").replace("-", "");
-            if cleaner_normalized == name_normalized {
-                return true;
-            }
-            // Starts with match for normalized version
-            cleaner_normalized.starts_with(&name_normalized)
-        })
+    get_all_cleaners().into_iter().find(|cleaner| {
+        let cleaner_name_lower = cleaner.name().to_lowercase();
+        // Direct match
+        if cleaner_name_lower == name_lower {
+            return true;
+        }
+        // Check for special aliases
+        if is_language_alias(&name_lower, &cleaner_name_lower) {
+            return true;
+        }
+        // Normalized match (remove dots, hyphens for node.js, etc.)
+        let name_normalized = name_lower.replace(".", "").replace("-", "");
+        let cleaner_normalized = cleaner_name_lower.replace(".", "").replace("-", "");
+        if cleaner_normalized == name_normalized {
+            return true;
+        }
+        // Starts with match for normalized version
+        cleaner_normalized.starts_with(&name_normalized)
+    })
 }

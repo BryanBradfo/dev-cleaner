@@ -45,7 +45,10 @@ fn check_pattern(
                 None
             }
         }
-        DetectionPattern::DirectoryWithSibling { dir_name: dn, sibling } => {
+        DetectionPattern::DirectoryWithSibling {
+            dir_name: dn,
+            sibling,
+        } => {
             if dir_name == dn && has_sibling_file(full_path, sibling) {
                 Some((cleaner.name().to_string(), cleaner.icon().to_string()))
             } else {
@@ -86,7 +89,8 @@ fn scan_with_cleaners(root: &Path, cleaners: &[Box<dyn LanguageCleaner>]) -> Vec
             // Try each cleaner's patterns
             for cleaner in cleaners {
                 for pattern in cleaner.project_patterns() {
-                    if let Some((ecosystem, icon)) = check_pattern(dir_name, path, &pattern, cleaner)
+                    if let Some((ecosystem, icon)) =
+                        check_pattern(dir_name, path, &pattern, cleaner)
                     {
                         // Check if this path is already inside a found item
                         let is_nested = found_paths
@@ -146,4 +150,3 @@ pub fn scan_directory_filtered(root: &Path, language: &str) -> Vec<FoundItem> {
         }
     }
 }
-
