@@ -1,11 +1,11 @@
 [package]
-name = "dev-cleaner"
+name = "sweepkit"
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.70"
 description = "A blazing-fast CLI tool to scan and clean unused dev dependencies across all ecosystems"
 license = "MIT"
-repository = "https://github.com/BryanBradfo/dev-cleaner"
+repository = "https://github.com/BryanBradfo/sweepkit"
 keywords = ["cli", "developer-tools", "cleaner", "disk-space", "node-modules"]
 categories = ["command-line-utilities", "development-tools"]
 authors = ["BryanBradfo"]

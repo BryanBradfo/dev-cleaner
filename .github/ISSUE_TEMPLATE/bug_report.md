@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Report a bug to help us improve dev-cleaner
+about: Report a bug to help us improve sweepkit
 title: '[BUG] '
 labels: bug
 assignees: ''
@@ -23,7 +23,7 @@ A clear and concise description of what actually happened.
 ## Environment
 - OS: [e.g., Windows 11, macOS 13, Ubuntu 22.04]
 - Rust version: [output of `rustc --version`]
-- dev-cleaner version: [output of `dev-cleaner --version`]
+- sweepkit version: [output of `sweepkit --version`]
 
 ## Error Messages/Logs
 ```

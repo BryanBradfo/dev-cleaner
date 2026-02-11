@@ -7,7 +7,7 @@ use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 
 #[derive(Parser)]
-#[command(name = "dev-cleaner")]
+#[command(name = "sweepkit")]
 #[command(about = "A blazing-fast CLI tool to scan and clean unused dev dependencies", long_about = None)]
 #[command(version)]
 struct Cli {
