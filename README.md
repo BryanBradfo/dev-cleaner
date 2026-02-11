@@ -189,6 +189,6 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for gui
 
 ## Star this repo!
 
-[![Star History Chart](https://api.star-history.com/svg?repos=BryanBradfo/sweepkit&type=date&legend=top-left)](https://www.star-history.com/#BryanBradfo/sweepkit&type=date&legend=top-left)
+[![Star History Chart](https://api.star-history.com/svg?repos=bryanbradfo/sweepkit&type=date&legend=top-left)](https://www.star-history.com/#bryanbradfo/sweepkit&type=date&legend=top-left)
 
 If you find this useful, give it a ⭐ — it helps others discover the project!
