@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest a new feature for dev-cleaner
+about: Suggest a new feature for sweepkit
 title: '[FEATURE] '
 labels: enhancement
 assignees: ''
@@ -24,7 +24,7 @@ Describe your use case for this feature. How would you use it?
 ## Example
 If applicable, provide an example of how this feature would work:
 ```bash
-dev-cleaner <your-feature> --example-flag
+sweepkit <your-feature> --example-flag
 ```
 
 ## Additional Context

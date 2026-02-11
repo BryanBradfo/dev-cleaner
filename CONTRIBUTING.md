@@ -1,6 +1,6 @@
-# Contributing to dev-cleaner
+# Contributing to sweepkit
 
-Thank you for your interest in contributing to dev-cleaner! 🎉
+Thank you for your interest in contributing to sweepkit! 🎉
 
 ## Getting Started
 
@@ -13,8 +13,8 @@ Thank you for your interest in contributing to dev-cleaner! 🎉
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/BryanBradfo/dev-cleaner.git
-   cd dev-cleaner
+   git clone https://github.com/BryanBradfo/sweepkit.git
+   cd sweepkit
    ```
 
 2. **Build the project**
@@ -74,7 +74,7 @@ This project follows the standard Rust style guidelines:
    ```bash
    cargo test
    cargo build --release
-   ./target/release/dev-cleaner scan
+   ./target/release/sweepkit scan
    ```
 
 4. **Push your branch** and create a pull request:
@@ -145,4 +145,4 @@ If you have questions about contributing, feel free to:
 
 ---
 
-Thank you for contributing to dev-cleaner! 🦀
+Thank you for contributing to sweepkit! 🦀
