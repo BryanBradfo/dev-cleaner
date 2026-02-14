@@ -1,4 +1,5 @@
 use super::{DetectionPattern, GlobalCachePath, LanguageCleaner, OrphanedPackage};
+use std::process::Command;
 
 pub struct PythonCleaner;
 
@@ -68,7 +69,72 @@ impl LanguageCleaner for PythonCleaner {
     }
 
     fn detect_orphaned_packages(&self) -> Option<Vec<OrphanedPackage>> {
-        // TODO: Implement by running `pip list` and analyzing usage
-        None
+        // Run `pip list` to get globally installed packages
+        let output = Command::new("pip")
+            .args(["list", "--format=freeze"])
+            .output();
+
+        let stdout = if let Ok(output) = output {
+            if !output.status.success() {
+                // Try pip3 if pip failed
+                let output3 = Command::new("pip3")
+                    .args(["list", "--format=freeze"])
+                    .output();
+                
+                let Ok(output3) = output3 else {
+                    return None;
+                };
+                
+                if !output3.status.success() {
+                    return None;
+                }
+                
+                String::from_utf8_lossy(&output3.stdout).to_string()
+            } else {
+                String::from_utf8_lossy(&output.stdout).to_string()
+            }
+        } else {
+            // pip command not found - try pip3
+            let output3 = Command::new("pip3")
+                .args(["list", "--format=freeze"])
+                .output();
+            
+            let Ok(output3) = output3 else {
+                return None;
+            };
+            
+            if !output3.status.success() {
+                return None;
+            }
+            
+            String::from_utf8_lossy(&output3.stdout).to_string()
+        };
+
+        // Parse pip output - format is: package-name==version
+        let mut packages = Vec::new();
+
+        for line in stdout.lines() {
+            let line = line.trim();
+            
+            if line.is_empty() {
+                continue;
+            }
+
+            // Split on == to get package name
+            if let Some((name, _version)) = line.split_once("==") {
+                packages.push(OrphanedPackage {
+                    name: name.trim().to_string(),
+                    size: 0, // Size calculation would require inspecting site-packages
+                    last_used: None,
+                });
+            }
+        }
+
+        if packages.is_empty() {
+            None
+        } else {
+            Some(packages)
+        }
     }
 }
+

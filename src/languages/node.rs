@@ -1,4 +1,5 @@
 use super::{DetectionPattern, GlobalCachePath, LanguageCleaner, OrphanedPackage};
+use std::process::Command;
 
 pub struct NodeCleaner;
 
@@ -64,7 +65,69 @@ impl LanguageCleaner for NodeCleaner {
     }
 
     fn detect_orphaned_packages(&self) -> Option<Vec<OrphanedPackage>> {
-        // TODO: Implement by running `npm list -g --depth=0`
-        None
+        // Run `npm list -g --depth=0` to get globally installed packages
+        let output = Command::new("npm")
+            .args(["list", "-g", "--depth=0"])
+            .output();
+
+        let Ok(output) = output else {
+            // npm command not found or failed
+            return None;
+        };
+
+        if !output.status.success() {
+            return None;
+        }
+
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let mut packages = Vec::new();
+
+        // Parse npm output - format is typically:
+        // /usr/local/lib
+        // ├── package1@version
+        // ├── package2@version
+        // └── package3@version
+        for line in stdout.lines() {
+            let line = line.trim();
+            
+            // Skip empty lines and the header line (path to global node_modules)
+            if line.is_empty() || !line.contains('@') {
+                continue;
+            }
+
+            // Remove tree characters (├──, └──, │) and whitespace
+            let cleaned = line
+                .trim_start_matches("├──")
+                .trim_start_matches("└──")
+                .trim_start_matches("│")
+                .trim();
+
+            // Extract package name (everything before @version)
+            if let Some(at_pos) = cleaned.find('@') {
+                // Handle scoped packages like @types/node@1.0.0
+                let name = if cleaned.starts_with('@') {
+                    // For scoped packages, find the second @
+                    if let Some(second_at) = cleaned[1..].find('@') {
+                        &cleaned[..second_at + 1]
+                    } else {
+                        continue;
+                    }
+                } else {
+                    &cleaned[..at_pos]
+                };
+
+                packages.push(OrphanedPackage {
+                    name: name.trim().to_string(),
+                    size: 0, // Size calculation would require traversing node_modules
+                    last_used: None,
+                });
+            }
+        }
+
+        if packages.is_empty() {
+            None
+        } else {
+            Some(packages)
+        }
     }
 }
