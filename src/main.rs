@@ -45,6 +45,12 @@ enum Commands {
         #[arg(short = 'l', long)]
         language: Option<String>,
     },
+    /// List globally installed packages
+    Global {
+        /// Filter by language/ecosystem (e.g., python, node, rust, java, cpp)
+        #[arg(short, long)]
+        language: Option<String>,
+    },
 }
 
 fn main() {
@@ -96,6 +102,51 @@ fn main() {
                 );
             } else {
                 cleaner::clean_directories(items, all);
+            }
+        }
+        Commands::Global { language } => {
+            println!("🔍 Scanning for globally installed packages...\n");
+
+            let cleaners = if let Some(lang) = language {
+                match languages::get_cleaner_by_name(&lang) {
+                    Some(cleaner) => vec![cleaner],
+                    None => {
+                        let available: Vec<String> = languages::get_all_cleaners()
+                            .iter()
+                            .map(|c| c.name().to_string())
+                            .collect();
+                        eprintln!(
+                            "⚠️  Unknown language '{}'. Available: {}",
+                            lang,
+                            available.join(", ")
+                        );
+                        return;
+                    }
+                }
+            } else {
+                languages::get_all_cleaners()
+            };
+
+            let mut found_any = false;
+
+            for cleaner in cleaners {
+                if let Some(packages) = cleaner.detect_orphaned_packages() {
+                    found_any = true;
+                    println!(
+                        "{} {} - {} global packages found:",
+                        cleaner.icon(),
+                        cleaner.name(),
+                        packages.len()
+                    );
+                    for pkg in packages {
+                        println!("  • {}", pkg.name);
+                    }
+                    println!();
+                }
+            }
+
+            if !found_any {
+                println!("✨ No globally installed packages found!");
             }
         }
     }
