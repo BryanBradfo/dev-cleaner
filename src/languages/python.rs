@@ -69,46 +69,8 @@ impl LanguageCleaner for PythonCleaner {
     }
 
     fn detect_orphaned_packages(&self) -> Option<Vec<OrphanedPackage>> {
-        // Run `pip list` to get globally installed packages
-        let output = Command::new("pip")
-            .args(["list", "--format=freeze"])
-            .output();
-
-        let stdout = if let Ok(output) = output {
-            if !output.status.success() {
-                // Try pip3 if pip failed
-                let output3 = Command::new("pip3")
-                    .args(["list", "--format=freeze"])
-                    .output();
-
-                let Ok(output3) = output3 else {
-                    return None;
-                };
-
-                if !output3.status.success() {
-                    return None;
-                }
-
-                String::from_utf8_lossy(&output3.stdout).to_string()
-            } else {
-                String::from_utf8_lossy(&output.stdout).to_string()
-            }
-        } else {
-            // pip command not found - try pip3
-            let output3 = Command::new("pip3")
-                .args(["list", "--format=freeze"])
-                .output();
-
-            let Ok(output3) = output3 else {
-                return None;
-            };
-
-            if !output3.status.success() {
-                return None;
-            }
-
-            String::from_utf8_lossy(&output3.stdout).to_string()
-        };
+        // Try both pip and pip3 commands
+        let stdout = try_pip_command()?;
 
         // Parse pip output - format is: package-name==version
         let mut packages = Vec::new();
@@ -135,5 +97,30 @@ impl LanguageCleaner for PythonCleaner {
         } else {
             Some(packages)
         }
+    }
+}
+
+/// Try running pip or pip3 to list installed packages
+fn try_pip_command() -> Option<String> {
+    // Try pip first
+    if let Ok(output) = Command::new("pip")
+        .args(["list", "--format=freeze"])
+        .output()
+    {
+        if output.status.success() {
+            return Some(String::from_utf8_lossy(&output.stdout).to_string());
+        }
+    }
+
+    // Fall back to pip3
+    let output3 = Command::new("pip3")
+        .args(["list", "--format=freeze"])
+        .output()
+        .ok()?;
+
+    if output3.status.success() {
+        Some(String::from_utf8_lossy(&output3.stdout).to_string())
+    } else {
+        None
     }
 }

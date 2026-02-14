@@ -108,6 +108,7 @@ impl LanguageCleaner for NodeCleaner {
                 let name = if let Some(stripped) = cleaned.strip_prefix('@') {
                     // For scoped packages, find the second @
                     if let Some(second_at) = stripped.find('@') {
+                        // +1 for the '@' prefix we stripped
                         &cleaned[..second_at + 1]
                     } else {
                         continue;
