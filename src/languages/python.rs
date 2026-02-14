@@ -80,15 +80,15 @@ impl LanguageCleaner for PythonCleaner {
                 let output3 = Command::new("pip3")
                     .args(["list", "--format=freeze"])
                     .output();
-                
+
                 let Ok(output3) = output3 else {
                     return None;
                 };
-                
+
                 if !output3.status.success() {
                     return None;
                 }
-                
+
                 String::from_utf8_lossy(&output3.stdout).to_string()
             } else {
                 String::from_utf8_lossy(&output.stdout).to_string()
@@ -98,15 +98,15 @@ impl LanguageCleaner for PythonCleaner {
             let output3 = Command::new("pip3")
                 .args(["list", "--format=freeze"])
                 .output();
-            
+
             let Ok(output3) = output3 else {
                 return None;
             };
-            
+
             if !output3.status.success() {
                 return None;
             }
-            
+
             String::from_utf8_lossy(&output3.stdout).to_string()
         };
 
@@ -115,7 +115,7 @@ impl LanguageCleaner for PythonCleaner {
 
         for line in stdout.lines() {
             let line = line.trim();
-            
+
             if line.is_empty() {
                 continue;
             }
@@ -137,4 +137,3 @@ impl LanguageCleaner for PythonCleaner {
         }
     }
 }
-

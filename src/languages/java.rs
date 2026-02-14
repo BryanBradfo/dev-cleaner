@@ -69,7 +69,7 @@ impl LanguageCleaner for JavaCleaner {
         // Detect multiple Gradle wrapper versions installed
         if let Some(home) = dirs::home_dir() {
             let gradle_wrapper = home.join(".gradle").join("wrapper").join("dists");
-            
+
             if !gradle_wrapper.exists() {
                 return None;
             }

@@ -56,9 +56,7 @@ impl LanguageCleaner for RustCleaner {
 
     fn detect_orphaned_packages(&self) -> Option<Vec<OrphanedPackage>> {
         // Run `cargo install --list` to get globally installed packages
-        let output = Command::new("cargo")
-            .args(["install", "--list"])
-            .output();
+        let output = Command::new("cargo").args(["install", "--list"]).output();
 
         let Ok(output) = output else {
             // cargo command not found or failed
@@ -80,7 +78,7 @@ impl LanguageCleaner for RustCleaner {
         //     binary3
         for line in stdout.lines() {
             let line = line.trim();
-            
+
             // Package lines don't start with whitespace and contain ' v'
             if line.starts_with(' ') || line.is_empty() {
                 continue;

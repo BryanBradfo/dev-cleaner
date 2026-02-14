@@ -89,7 +89,7 @@ impl LanguageCleaner for NodeCleaner {
         // └── package3@version
         for line in stdout.lines() {
             let line = line.trim();
-            
+
             // Skip empty lines and the header line (path to global node_modules)
             if line.is_empty() || !line.contains('@') {
                 continue;
@@ -105,9 +105,9 @@ impl LanguageCleaner for NodeCleaner {
             // Extract package name (everything before @version)
             if let Some(at_pos) = cleaned.find('@') {
                 // Handle scoped packages like @types/node@1.0.0
-                let name = if cleaned.starts_with('@') {
+                let name = if let Some(stripped) = cleaned.strip_prefix('@') {
                     // For scoped packages, find the second @
-                    if let Some(second_at) = cleaned[1..].find('@') {
+                    if let Some(second_at) = stripped.find('@') {
                         &cleaned[..second_at + 1]
                     } else {
                         continue;
